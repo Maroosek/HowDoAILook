@@ -23,9 +23,9 @@ async function generateModel() {
 
   try {
     const formData = new FormData()
-    files.value.forEach((file, index) => {
-      formData.append(`file${index + 1}`, file)
-    })
+    for (const [category, file] of Object.entries(files.value)) {
+      formData.append(category, file)
+    }
 
     const res = await axios.post('/api/generate-model', formData)
     generatedImage.value = res.data.imageUrl || `data:image/png;base64,${res.data.image}`
