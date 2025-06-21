@@ -1,54 +1,41 @@
 <script setup>
 import { ref, computed } from 'vue'
-import UploadPanel from './components/UploadPanel.vue'
-import GenerateButton from './components/GenerateButton.vue'
-import ModelPreview from './components/ModelPreview.vue'
-//import axios from 'axios'
+import Home from './views/Home.vue'
+import OutfitVisualisation from './views/OutfitVisualisation.vue'
 
-const files = ref([])
-const generatedImage = ref(null)
-const isLoading = ref(false)
+const currentView = ref('home')
 
-const hasFiles = computed(() => files.value.length > 0)
-
-function handleFiles(selectedFiles) {
-  files.value = selectedFiles
+const views = {
+  home: 'Strona główna',
+  visualization: 'Wizualizacja ubioru',
+  suggestion: 'Dobieranie ubrań',
 }
 
-async function generateModel() {
-  if (!hasFiles.value) return
-
-  isLoading.value = true
-  generatedImage.value = null
-
-  try {
-    const formData = new FormData()
-    for (const [category, file] of Object.entries(files.value)) {
-      formData.append(category, file)
-    }
-
-    const res = await axios.post('/api/generate-model', formData)
-    generatedImage.value = res.data.imageUrl || `data:image/png;base64,${res.data.image}`
-  } catch (err) {
-    console.error('API Error:', err)
-    alert('Błąd podczas generowania modela.')
-  } finally {
-    isLoading.value = false
+const currentComponent = computed(() => {
+  switch (currentView.value) {
+    case 'visualization': return OutfitVisualisation
+    case 'suggestion': return OutfitSuggestion
+    default: return Home
   }
-}
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100 p-6">
-    <h1 class="text-3xl font-bold text-center mb-8">AI Stylista – Generuj modela w swoich ubraniach</h1>
+    <nav class="flex gap-4 mb-6">
+      <button
+        v-for="(label, key) in views"
+        :key="key"
+        @click="currentView = key"
+        :class="[
+          'px-4 py-2 rounded',
+          currentView === key ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600'
+        ]"
+      >
+        {{ label }}
+      </button>
+    </nav>
 
-    <UploadPanel @files-selected="handleFiles" />
-
-    <GenerateButton :disabled="!hasFiles || isLoading" @generate="generateModel" />
-
-    <div v-if="isLoading" class="text-center mt-4 text-blue-600">Generowanie modela...</div>
-
-    <ModelPreview v-if="generatedImage" :src="generatedImage" />
+    <component :is="currentComponent" />
   </div>
 </template>
-
