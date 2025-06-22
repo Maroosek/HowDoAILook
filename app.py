@@ -1,8 +1,9 @@
 import base64
 from flask import Flask, request, jsonify
 from ai_handler import get_clothing_description, choose_best_outfit, generate_outfit_image
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/api/generate-outfit', methods=['POST'])
 def generate_outfit():
