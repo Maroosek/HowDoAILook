@@ -28,7 +28,7 @@ async function generateModel() {
 
   try {
     const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', {
-      image_base64: fileData.value.base64.split(',')[1], // usuń "data:image/png;base64,"
+      image_base64: fileData.value.base64.split(',')[1],
       mime_type: fileData.value.base64.match(/^data:(.*?);base64/)?.[1] || 'image/png'
     })
 
@@ -73,7 +73,8 @@ async function generateModel() {
       <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
       <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
       <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
-      <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow" />
+      <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow" 
+      style="max-width: 32rem; max-height: 32rem;"/>
     </div>
   </div>
 </template>

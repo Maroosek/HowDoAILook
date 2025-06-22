@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import Home from './views/Home.vue'
 import OutfitVisualisation from './views/OutfitVisualisation.vue'
+import OutfitSuggestion from './views/OutfitSuggestion.vue'
 
 const currentView = ref('home')
 
