@@ -27,8 +27,16 @@ const previews = ref({
   shoes: null
 })
 
+const result = ref({
+  desc: '',
+  best_outfit: '',
+  img_url: '',
+})
+
 const isLoading = ref(false)
 const generatedImage = ref(null)
+const mergedImages = ref(null)
+const progressMessage = ref('')
 
 const selectedCount = computed(() =>
   Object.values(selected.value).filter(Boolean).length
@@ -47,25 +55,68 @@ function handleFileSelected({ category, file, previewUrl }) {
   previews.value[category] = previewUrl
 }
 
+async function mergeImagesVertically() {
+  const selectedFiles = categories
+    .filter(cat => selected.value[cat.key] && files.value[cat.key])
+    .map(cat => files.value[cat.key]);
+
+  if (selectedFiles.length === 0) return null;
+
+  const imageElements = await Promise.all(
+    selectedFiles.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    })
+  );
+
+  const width = Math.max(...imageElements.map(img => img.width));
+  const height = imageElements.reduce((sum, img) => sum + img.height, 0);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  let y = 0;
+  for (const img of imageElements) {
+    ctx.drawImage(img, 0, y, img.width, img.height);
+    y += img.height;
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
 async function generateSuggestion() {
   if (!canSubmit.value) return
 
   isLoading.value = true
   generatedImage.value = null
+  mergedImages.value = null
 
   try {
-    const formData = new FormData()
-    for (const [category, isChecked] of Object.entries(selected.value)) {
-      if (isChecked && files.value[category]) {
-        formData.append(category, files.value[category])
-      }
-    }
+    mergedImages.value = await mergeImagesVertically();
 
-    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', {
+      image_base64: mergedImages.value?.split(',')[1],
+      mime_type: mergedImages.value?.match(/^data:(.*?);base64/)?.[1] || 'image/png'
     })
 
-    generatedImage.value = res.data.img_url
+    progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
+    result.value = {
+      desc: res.data.desc,
+      best_outfit: res.data.best_outfit,
+      img_url: res.data.img_url
+    }
+
   } catch (err) {
     console.error('API Error:', err)
     alert('Błąd podczas komunikacji z API.')
@@ -104,10 +155,13 @@ async function generateSuggestion() {
         </div>
       </div>
 
-      <div v-if="generatedImage" class="mt-6 text-center">
-        <h2 class="text-lg font-semibold mb-2">Wygenerowany model:</h2>
-        <img :src="generatedImage" class="mx-auto rounded border max-w-xs" />
-      </div>
+      <div v-if="result.img_url" class="mt-8 text-center">
+      <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
+      <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
+      <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
+      <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow" 
+      style="max-width: 32rem; max-height: 32rem;"/>
+    </div>
     </div>
   </div>
 </template>

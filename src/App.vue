@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import Home from './views/Home.vue'
 import OutfitVisualisation from './views/OutfitVisualisation.vue'
 import OutfitSuggestion from './views/OutfitSuggestion.vue'
+import imagemerge from './views/imagemerge.vue'
 
 const currentView = ref('home')
 
@@ -10,12 +11,14 @@ const views = {
   home: 'Strona główna',
   visualization: 'Wizualizacja ubioru',
   suggestion: 'Dobieranie ubrań',
+  imagemerge: 'Łączenie zdjęć'
 }
 
 const currentComponent = computed(() => {
   switch (currentView.value) {
     case 'visualization': return OutfitVisualisation
     case 'suggestion': return OutfitSuggestion
+    case 'imagemerge': return imagemerge
     default: return Home
   }
 })

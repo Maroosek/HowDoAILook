@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import axios from 'axios'
 import UploadPanelSingle from '../components/UploadPanelSingle.vue'
 
+//TODO add sex option, style preference, formal, casual, etc.
+
 const fileData = ref({})
 const isLoading = ref(false)
 const progressMessage = ref('')
