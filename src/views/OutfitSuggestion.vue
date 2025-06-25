@@ -16,9 +16,9 @@ const selected = ref({
 })
 
 const files = ref({
-  shirt: null,
-  pants: null,
-  shoes: null
+  shirt: [],
+  pants: [],
+  shoes: []
 })
 
 const previews = ref({
@@ -45,14 +45,14 @@ const selectedCount = computed(() =>
 const canSubmit = computed(() =>
   selectedCount.value > 0 &&
   Object.entries(selected.value).every(([key, isChecked]) =>
-    !isChecked || files.value[key]
+    !isChecked || files.value[key].length
   )
 )
 
 // Obsługa pliku z UploadPanel
-function handleFileSelected({ category, file, previewUrl }) {
-  files.value[category] = file
-  previews.value[category] = previewUrl
+function handleFileSelected({ category, base64, previews: pv }) {
+  files.value[category] = base64
+  previews.value[category] = pv
 }
 
 async function mergeImagesVertically() {
@@ -103,13 +103,19 @@ async function generateSuggestion() {
   mergedImages.value = null
 
   try {
-    mergedImages.value = await mergeImagesVertically();
+    //mergedImages.value = await mergeImagesVertically();
 
-    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', {
-      image_base64: mergedImages.value?.split(',')[1],
-      mime_type: mergedImages.value?.match(/^data:(.*?);base64/)?.[1] || 'image/png'
-    })
-
+    // const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', {
+    //   image_base64: mergedImages.value?.split(',')[1],
+    //   mime_type: mergedImages.value?.match(/^data:(.*?);base64/)?.[1] || 'image/png'
+    // })
+    const payload = {}
+    for (const { key } of categories) {
+      if (selected.value[key] && files.value[key].length) {
+        payload[key] = files.value[key]      // tablica Base-64
+      }
+    }
+    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
       desc: res.data.desc,
@@ -130,23 +136,14 @@ async function generateSuggestion() {
   <div class="min-h-screen bg-gray-100 p-6">
     <h1 class="text-3xl font-bold text-center mb-6">AI Stylista – Dobierz stylizację</h1>
 
-    <div class="bg-white max-w-2xl mx-auto p-6 rounded shadow space-y-6">
-      <UploadPanel
-        v-for="category in categories"
-        :key="category.key"
-        :label="category.label"
-        :category="category.key"
-        v-model="selected[category.key]"
-        :preview-url="previews[category.key]"
-        @file-selected="handleFileSelected"
-      />
-
+    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow">
+      <div class="flex flex-wrap gap-6 justify-center">
+      <UploadPanel v-for="category in categories" :key="category.key" :label="category.label" :category="category.key"
+        v-model="selected[category.key]" :preview-url="previews[category.key]" @file-selected="handleFileSelected" />
+      </div>
       <div class="text-center">
-        <button
-          class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          :disabled="!canSubmit || isLoading"
-          @click="generateSuggestion"
-        >
+        <button class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50" :disabled="!canSubmit || isLoading"
+          @click="generateSuggestion">
           Generuj stylizację
         </button>
 
@@ -156,12 +153,12 @@ async function generateSuggestion() {
       </div>
 
       <div v-if="result.img_url" class="mt-8 text-center">
-      <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
-      <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
-      <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
-      <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow" 
-      style="max-width: 32rem; max-height: 32rem;"/>
-    </div>
+        <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
+        <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
+        <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
+        <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow"
+          style="max-width: 32rem; max-height: 32rem;" />
+      </div>
     </div>
   </div>
 </template>
