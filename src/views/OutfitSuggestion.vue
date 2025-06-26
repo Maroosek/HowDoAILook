@@ -37,6 +37,8 @@ const isLoading = ref(false)
 const generatedImage = ref(null)
 const mergedImages = ref(null)
 const progressMessage = ref('')
+const sex = ref('Mężczyzna') // Domyślnie mężczyzna
+const selectedStyle = ref('casual') // Domyślny styl
 
 const selectedCount = computed(() =>
   Object.values(selected.value).filter(Boolean).length
@@ -55,45 +57,45 @@ function handleFileSelected({ category, base64, previews: pv }) {
   previews.value[category] = pv
 }
 
-async function mergeImagesVertically() {
-  const selectedFiles = categories
-    .filter(cat => selected.value[cat.key] && files.value[cat.key])
-    .map(cat => files.value[cat.key]);
+// async function mergeImagesVertically() {
+//   const selectedFiles = categories
+//     .filter(cat => selected.value[cat.key] && files.value[cat.key])
+//     .map(cat => files.value[cat.key]);
 
-  if (selectedFiles.length === 0) return null;
+//   if (selectedFiles.length === 0) return null;
 
-  const imageElements = await Promise.all(
-    selectedFiles.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    })
-  );
+//   const imageElements = await Promise.all(
+//     selectedFiles.map(file => {
+//       return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+//         reader.onload = e => {
+//           const img = new Image();
+//           img.onload = () => resolve(img);
+//           img.onerror = reject;
+//           img.src = e.target.result;
+//         };
+//         reader.onerror = reject;
+//         reader.readAsDataURL(file);
+//       });
+//     })
+//   );
 
-  const width = Math.max(...imageElements.map(img => img.width));
-  const height = imageElements.reduce((sum, img) => sum + img.height, 0);
+//   const width = Math.max(...imageElements.map(img => img.width));
+//   const height = imageElements.reduce((sum, img) => sum + img.height, 0);
 
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
+//   const canvas = document.createElement('canvas');
+//   canvas.width = width;
+//   canvas.height = height;
+//   const ctx = canvas.getContext('2d');
 
-  let y = 0;
-  for (const img of imageElements) {
-    ctx.drawImage(img, 0, y, img.width, img.height);
-    y += img.height;
-  }
+//   let y = 0;
+//   for (const img of imageElements) {
+//     ctx.drawImage(img, 0, y, img.width, img.height);
+//     y += img.height;
+//   }
 
-  return canvas.toDataURL('image/png');
-}
+//   return canvas.toDataURL('image/png');
+// }
 
 async function generateSuggestion() {
   if (!canSubmit.value) return
@@ -112,9 +114,13 @@ async function generateSuggestion() {
     const payload = {}
     for (const { key } of categories) {
       if (selected.value[key] && files.value[key].length) {
-        payload[key] = files.value[key]      // tablica Base-64
+      payload[key] = files.value[key]      // tablica Base-64
       }
     }
+    payload.sex = sex.value
+    payload.selectedStyle = selectedStyle.value
+
+    
     const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
@@ -135,6 +141,43 @@ async function generateSuggestion() {
 <template>
   <div class="min-h-screen bg-gray-100 p-6">
     <h1 class="text-3xl font-bold text-center mb-6">AI Stylista – Dobierz stylizację</h1>
+
+    <div>
+      <p class="text-center text-gray-600 mb-4">
+        Wybierz zdjęcia ubrań, które chcesz wykorzystać do stworzenia stylizacji. Możesz przesłać maksymalnie trzy zdjęcia z każdej kategorii.
+        <br>
+        <strong>Uwaga:</strong> Upewnij się, że zdjęcia są dobrej jakości i przedstawiają tylko ubrania bez innych elementów.
+
+      </p>
+    </div>
+
+    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
+      <p class="text-center mb-4">Zaznacz płeć modela</p>
+      <div class="flex justify-center mb-6">
+        <label class="inline-flex items-center mr-4">
+          <input type="radio" id="man" value="Mężczyzna" v-model="sex" class="form-radio text-blue-600" />
+          <span class="ml-2">Mężczyzna</span>
+          <input type="radio" id="woman" value="Kobieta" v-model="sex" class="form-radio text-blue-600 ml-4" />
+          <span class="ml-2">Kobieta</span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
+      <p class="text-center mb-4">Wybierz docelowy styl ubioru</p>
+      <div class="flex justify-center gap-4">
+        <select v-model="selectedStyle" class="border border-gray-300 rounded p-2">
+          <option value="casual">Casual</option>
+          <option value="formal">Formalny</option>
+          <option value="sport">Sportowy</option>
+          <option value="elegant">Elegancki</option>
+          <option value="streetwear">Streetwear</option>
+          <option value="vintage">Vintage</option>
+        </select>
+      </div>
+    </div>
+
+    <br>
 
     <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow">
       <div class="flex flex-wrap gap-6 justify-center">
