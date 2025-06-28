@@ -106,15 +106,17 @@ watch(previews, (newVal, oldVal) => {
 
       <button type="button" class="btn" @click="triggerFileInput">Dodaj ubranie</button>
 
-      <div v-if="previews.length" class="mt-2 flex gap-2 flex-wrap">
-        <div v-for="(p, i) in previews" :key="i" class="relative w-32 h-32">
-          <img :src="p" class="preview-img w-full h-full object-cover rounded" />
-          <div class="absolute top-1 right-1 flex flex-col gap-1">
-            <button type="button" class="bg-white rounded shadow p-1" @click="deleteImage(i)">🗑️</button>
-            <button type="button" class="bg-white rounded shadow p-1" @click="editImage(i)">✏️</button>
-          </div>
-        </div>
-      </div>
+<div v-if="previews.length" class="mt-2 grid grid-cols-2 gap-2 max-w-xs mx-auto">
+  <div v-for="(p, i) in previews" :key="i" class="relative w-32 h-32">
+    <img :src="p" class="preview-img w-full h-full object-cover rounded" />
+    <div class="absolute top-1 right-1 flex flex-col gap-1">
+      <button type="button" class="bg-white rounded shadow p-1" @click="deleteImage(i)">🗑️</button>
+      <button type="button" class="bg-white rounded shadow p-1" @click="editImage(i)">✏️</button>
+    </div>
+  </div>
+</div>
+
+
     </div>
   </div>
 </template>

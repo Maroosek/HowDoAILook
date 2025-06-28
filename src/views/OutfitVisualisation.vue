@@ -29,7 +29,7 @@ async function generateModel() {
   result.value = {}
 
   try {
-    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', {
+    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', {
       image_base64: fileData.value.base64.split(',')[1],
       mime_type: fileData.value.base64.match(/^data:(.*?);base64/)?.[1] || 'image/png'
     })

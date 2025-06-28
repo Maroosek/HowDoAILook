@@ -4,14 +4,12 @@ import Home from './views/Home.vue'
 import OutfitVisualisation from './views/OutfitVisualisation.vue'
 import OutfitSuggestion from './views/OutfitSuggestion.vue'
 import imagemerge from './views/imagemerge.vue'
+import AuthorsView from './views/AuthorsView.vue'
 
 const currentView = ref('home')
 
 const views = {
-  home: 'Strona główna',
-  visualization: 'Wizualizacja ubioru',
-  suggestion: 'Dobieranie ubrań',
-  imagemerge: 'Łączenie zdjęć'
+  home: 'Menu',
 }
 
 const currentComponent = computed(() => {
@@ -19,20 +17,22 @@ const currentComponent = computed(() => {
     case 'visualization': return OutfitVisualisation
     case 'suggestion': return OutfitSuggestion
     case 'imagemerge': return imagemerge
+    case 'authorsview': return AuthorsView
     default: return Home
   }
 })
 </script>
 
 <template>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <div class="min-h-screen bg-gray-100 p-6">
-    <nav class="flex gap-4 mb-6">
+    <nav class="flex justify-center gap-4 mb-2">
       <button
         v-for="(label, key) in views"
         :key="key"
         @click="currentView = key"
         :class="[
-          'px-4 py-2 rounded',
+          'menu-btn',
           currentView === key ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600'
         ]"
       >
@@ -40,6 +40,15 @@ const currentComponent = computed(() => {
       </button>
     </nav>
 
-    <component :is="currentComponent" />
+    <component :is="currentComponent" @change-view="currentView = $event" />
   </div>
 </template>
+
+<style scoped>
+.menu-btn {
+  font-size: 0.87rem;
+  padding: 3px 14px;
+  border-radius: 8px;
+  min-width: 64px;
+}
+</style>

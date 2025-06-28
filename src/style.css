@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background: linear-gradient(135deg, #472963 0%, #213a60 100%);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -66,8 +66,10 @@ button:focus-visible {
 }
 
 .upload-panel {
-  width: 260px;
-  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
 #app {
@@ -89,3 +91,5 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+

@@ -2,11 +2,12 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import UploadPanel from '../components/UploadPanel.vue'
+import '../styleSuggestion.css'
 
 const categories = [
   { key: 'shirt', label: 'Koszula/Bluza' },
   { key: 'pants', label: 'Spodnie' },
-  { key: 'shoes', label: 'Buty' }
+  // { key: 'shoes', label: 'Buty' }
 ]
 
 const selected = ref({
@@ -121,7 +122,7 @@ async function generateSuggestion() {
     payload.selectedStyle = selectedStyle.value
 
     
-    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', payload)
+    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
       desc: res.data.desc,
@@ -139,69 +140,78 @@ async function generateSuggestion() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 p-6">
-    <h1 class="text-3xl font-bold text-center mb-6">AI Stylista – Dobierz stylizację</h1>
+  <div class="outfit-bg">
+    <div class="outfit-glass-container">
+      <h1 class="text-3xl font-bold text-center mb-6">AI Stylista – Dobierz stylizację</h1>
 
-    <div>
-      <p class="text-center text-gray-600 mb-4">
-        Wybierz zdjęcia ubrań, które chcesz wykorzystać do stworzenia stylizacji. Możesz przesłać maksymalnie trzy zdjęcia z każdej kategorii.
-        <br>
-        <strong>Uwaga:</strong> Upewnij się, że zdjęcia są dobrej jakości i przedstawiają tylko ubrania bez innych elementów.
+      <div>
+        <p class="text-center text-gray-600 mb-4">
+          Wybierz zdjęcia ubrań, które chcesz wykorzystać do stworzenia stylizacji. Możesz przesłać maksymalnie trzy zdjęcia z każdej kategorii.
+          <br>
+          <strong>Uwaga:</strong> Upewnij się, że zdjęcia są dobrej jakości i przedstawiają tylko ubrania bez innych elementów.
 
-      </p>
-    </div>
-
-    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
-      <p class="text-center mb-4">Zaznacz płeć modela</p>
-      <div class="flex justify-center mb-6">
-        <label class="inline-flex items-center mr-4">
-          <input type="radio" id="man" value="Mężczyzna" v-model="sex" class="form-radio text-blue-600" />
-          <span class="ml-2">Mężczyzna</span>
-          <input type="radio" id="woman" value="Kobieta" v-model="sex" class="form-radio text-blue-600 ml-4" />
-          <span class="ml-2">Kobieta</span>
-        </label>
+        </p>
       </div>
-    </div>
-    
-    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
-      <p class="text-center mb-4">Wybierz docelowy styl ubioru</p>
-      <div class="flex justify-center gap-4">
-        <select v-model="selectedStyle" class="border border-gray-300 rounded p-2">
-          <option value="casual">Casual</option>
-          <option value="formal">Formalny</option>
-          <option value="sport">Sportowy</option>
-          <option value="elegant">Elegancki</option>
-          <option value="streetwear">Streetwear</option>
-          <option value="vintage">Vintage</option>
-        </select>
+
+      <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
+        <p class="text-center mb-4">Zaznacz płeć modela</p>
+        <div class="flex justify-center mb-6">
+          <label class="inline-flex items-center mr-4">
+            <input type="radio" id="man" value="Mężczyzna" v-model="sex" class="form-radio text-blue-600" />
+            <span class="ml-2">Mężczyzna</span>
+            <input type="radio" id="woman" value="Kobieta" v-model="sex" class="form-radio text-blue-600 ml-4" />
+            <span class="ml-2">Kobieta</span>
+          </label>
+        </div>
       </div>
-    </div>
-
-    <br>
-
-    <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow">
-      <div class="flex flex-wrap gap-6 justify-center">
-      <UploadPanel v-for="category in categories" :key="category.key" :label="category.label" :category="category.key"
-        v-model="selected[category.key]" :preview-url="previews[category.key]" @file-selected="handleFileSelected" />
-      </div>
-      <div class="text-center">
-        <button class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50" :disabled="!canSubmit || isLoading"
-          @click="generateSuggestion">
-          Generuj stylizację
-        </button>
-
-        <div v-if="isLoading" class="mt-3 text-blue-600 animate-pulse">
-          Wysyłanie danych do AI... (To może chwilę potrwać)
+      
+      <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow mb-6">
+        <p class="text-center mb-4">Wybierz docelowy styl ubioru</p>
+        <div class="flex justify-center mb-4">
+  <select v-model="selectedStyle" class="border border-gray-300 rounded p-2" style="margin:0; min-width: 180px; text-align:center;">
+            <option value="casual">Casual</option>
+            <option value="formal">Formalny</option>
+            <option value="sport">Sportowy</option>
+            <option value="elegant">Elegancki</option>
+            <option value="streetwear">Streetwear</option>
+            <option value="vintage">Vintage</option>
+          </select>
         </div>
       </div>
 
-      <div v-if="result.img_url" class="mt-8 text-center">
-        <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
-        <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
-        <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
-        <img :src="result.img_url" class="max-w-md mx-auto mt-4 rounded border shadow"
-          style="max-width: 32rem; max-height: 32rem;" />
+      <br>
+
+      <div class="bg-white max-w-4xl mx-auto p-6 rounded shadow">
+        <div class="flex flex-wrap gap-6 justify-center">
+        <UploadPanel v-for="category in categories" :key="category.key" :label="category.label" :category="category.key"
+          v-model="selected[category.key]" :preview-url="previews[category.key]" @file-selected="handleFileSelected" />
+        </div>
+        <div class="text-center mb-4">
+          <button class="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50" :disabled="!canSubmit || isLoading"
+            @click="generateSuggestion">
+            Generuj stylizację
+          </button>
+
+          <div v-if="isLoading" class="my-4 flex flex-col items-center">
+            <span style="color:#91a0ff;">Wysyłanie danych do AI... (To może chwilę potrwać)</span>
+            <div class="loading-bar-container">
+              <div class="loading-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="result.img_url" class="mt-8 text-center">
+          <h2 class="text-xl font-semibold mb-2">Wynik:</h2>
+          <p class="mb-2"><strong>Opis ubrań:</strong> {{ result.desc }}</p>
+          <p class="mb-2"><strong>Proponowana stylizacja:</strong> {{ result.best_outfit }}</p>
+          <img
+            :src="result.img_url"
+            class="mx-auto mt-4 rounded border shadow"
+            style="max-width: 100%; height: auto; object-fit: contain; background: white;"
+          />
+        </div>
       </div>
     </div>
   </div>
+
 </template>

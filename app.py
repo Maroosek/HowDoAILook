@@ -10,6 +10,9 @@ CORS(app)
 def generate_outfit():
     data = request.get_json()
 
+    sex = data.get("sex")
+    selected_style = data.get("selectedStyle")
+    print(sex, selected_style)
     shirts = data.get("shirt", [])
     pants  = data.get("pants", [])
     shoes  = data.get("shoes", [])
@@ -24,8 +27,8 @@ def generate_outfit():
     merged_uri = ImageMerger.merge_rows(shirts, pants, shoes)
 
     desc        = get_clothing_description(merged_uri)
-    best_outfit = choose_best_outfit(desc)
-    img_url     = generate_outfit_image(best_outfit, merged_uri)
+    best_outfit = choose_best_outfit(desc, sex, selected_style)
+    img_url     = generate_outfit_image(best_outfit, merged_uri, sex, selected_style)
 
     if hasattr(img_url, "url"):
         img_url = img_url.url
@@ -38,32 +41,9 @@ def generate_outfit():
         {
             "desc": desc,
             "best_outfit": best_outfit,
-            "img_url": img_url,        # wygenerowana stylizacja (jak wcześniej)
-            "img_merged": merged_uri,  # płótno z wgranymi zdjęciami
+            "img_url": img_url,
+            "img_merged": merged_uri,
         })
 
-
-    # image_base64 = data['image_base64']
-    # mime_type = data.get('mime_type', 'image/png')
-    # data_uri = f"data:{mime_type};base64,{image_base64}"
-    #
-    # desc = get_clothing_description(data_uri)
-    # best_outfit = choose_best_outfit(desc)
-    # img_url = generate_outfit_image(best_outfit, data_uri)
-    #
-    # if hasattr(img_url, "url"):
-    #     img_url = img_url.url
-    # elif hasattr(img_url, "path"):
-    #     img_url = img_url.path
-    # elif not isinstance(img_url, str):
-    #     img_url = str(img_url)
-    #
-    # return jsonify({
-    #     "desc": desc,
-    #     "best_outfit": best_outfit,
-    #     "img_url": img_url
-    # })
-
-
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
