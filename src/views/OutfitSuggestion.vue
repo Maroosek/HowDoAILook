@@ -122,7 +122,7 @@ async function generateSuggestion() {
     payload.selectedStyle = selectedStyle.value
 
     
-    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', payload)
+    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
       desc: res.data.desc,
