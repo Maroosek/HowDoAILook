@@ -57,7 +57,7 @@ watch(preview, (newVal, oldVal) => {
       </label>
 
       <div v-if="selected">
-        <input type="file" accept="image/*" multiple @change="onFileChange" />
+        <input type="file" accept="image/*" capture="environment" multiple @change="onFileChange" />
 
         <div v-if="preview" class="mt-2">
           <img

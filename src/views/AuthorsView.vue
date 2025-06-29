@@ -38,7 +38,7 @@
 const authors = [
   {
     name: "Marek Korkosz",
-    role: "Frontend Developer",
+    role: "Frontend & Mobile",
     avatar: "https://i.pinimg.com/736x/02/51/48/0251481d696d33984f6e9c0bacbf0ccc.jpg",
     linkedin: "https://www.linkedin.com/in/marek-korkosz-474a882a3/",
     github: "https://github.com/Maroosek"

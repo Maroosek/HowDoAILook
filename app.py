@@ -1,6 +1,6 @@
 import base64
 from flask import Flask, request, jsonify
-from ai_handler import get_clothing_description, choose_best_outfit, generate_outfit_image
+from ai_handler import get_clothing_description, choose_best_outfit, generate_outfit_image, generate_outfit_video
 from flask_cors import CORS
 from photo_handler import ImageMerger
 app = Flask(__name__)
@@ -44,6 +44,28 @@ def generate_outfit():
             "img_url": img_url,
             "img_merged": merged_uri,
         })
+
+@app.route('/api/generate-outfit-video', methods=['POST'])
+def generate_outfit_video_route():
+    data = request.get_json()
+    picture = data.get("picture")
+
+    if not picture:
+        return jsonify({"error": "Brak obrazu stroju"}), 400
+
+    video = generate_outfit_video(picture)
+    print(video)
+    if hasattr(video, "url"):
+        video_url = video.url
+    elif hasattr(video, "path"):
+        video_url = video.path
+    elif isinstance(video, str):
+        video_url = video
+    else:
+        video_url = str(video)
+
+    return jsonify({"video_url": video_url})
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

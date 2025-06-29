@@ -34,11 +34,17 @@ const result = ref({
   img_url: '',
 })
 
+const videoResult = ref({
+  isLoading: false,
+  error: '',
+  video_url: ''
+})
+
 const isLoading = ref(false)
 const generatedImage = ref(null)
 const mergedImages = ref(null)
 const progressMessage = ref('')
-const sex = ref('Mężczyzna') // Domyślnie mężczyzna
+const sex = ref('male') // Domyślnie mężczyzna
 const selectedStyle = ref('casual') // Domyślny styl
 
 const selectedCount = computed(() =>
@@ -98,6 +104,23 @@ function handleFileSelected({ category, base64, previews: pv }) {
 //   return canvas.toDataURL('image/png');
 // }
 
+async function generateVideo() {
+  videoResult.value.isLoading = true
+  videoResult.value.error = ''
+  videoResult.value.video_url = ''
+  try {
+    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit-video', {
+      picture: result.value.img_url
+    })
+    videoResult.value.video_url = res.data?.video_url || res.data?.url || ''
+    if (!videoResult.value.video_url) throw new Error("Brak url do wideo")
+  } catch (e) {
+    videoResult.value.error = 'Błąd podczas generowania wideo'
+  } finally {
+    videoResult.value.isLoading = false
+  }
+}
+
 async function generateSuggestion() {
   if (!canSubmit.value) return
 
@@ -122,7 +145,7 @@ async function generateSuggestion() {
     payload.selectedStyle = selectedStyle.value
 
     
-    const res = await axios.post('http://127.0.0.1:5000/api/generate-outfit', payload)
+    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
       desc: res.data.desc,
@@ -157,9 +180,9 @@ async function generateSuggestion() {
         <p class="text-center mb-4">Zaznacz płeć modela</p>
         <div class="flex justify-center mb-6">
           <label class="inline-flex items-center mr-4">
-            <input type="radio" id="man" value="Mężczyzna" v-model="sex" class="form-radio text-blue-600" />
+            <input type="radio" id="man" value="male" v-model="sex" class="form-radio text-blue-600" />
             <span class="ml-2">Mężczyzna</span>
-            <input type="radio" id="woman" value="Kobieta" v-model="sex" class="form-radio text-blue-600 ml-4" />
+            <input type="radio" id="woman" value="female" v-model="sex" class="form-radio text-blue-600 ml-4" />
             <span class="ml-2">Kobieta</span>
           </label>
         </div>
@@ -209,6 +232,22 @@ async function generateSuggestion() {
             class="mx-auto mt-4 rounded border shadow"
             style="max-width: 100%; height: auto; object-fit: contain; background: white;"
           />
+          <button
+              class="mt-4"
+              style="display:block; margin:auto;"
+              @click="generateVideo"
+            >
+              🎬 Wygenerować wideo?
+          </button>
+          <div v-if="videoResult.isLoading" class="mt-2 text-blue-400">Generuję wideo...</div>
+            <div v-if="videoResult.error" class="mt-2 text-red-400">{{ videoResult.error }}</div>
+            <video
+              v-if="videoResult.video_url"
+              :src="videoResult.video_url"
+              controls
+              class="mx-auto mt-4 rounded border shadow"
+              style="max-width: 100%; background: white;"
+            ></video>
         </div>
       </div>
     </div>

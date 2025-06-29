@@ -41,8 +41,8 @@ def choose_best_outfit(clothing_list, sex_param, style_param):
 def generate_outfit_image(ansToSend, data_uri, sex_param, style_param):
     print(f"inside generate_outfit_image")
     prompt_flux = (
-        f"A photorealistic, full-body photo of a male model wearing this clothes: {ansToSend} from the input_image. "
-        f"No other clothes or accessories. White background. Use style this style: {style_param} and this genred: {sex_param}"
+        f"A photorealistic, full-body photo of a {sex_param} model wearing this clothes: {ansToSend} from the input_image. S"
+        f"tyle of the photo is {style_param}. No other clothes or accessories. White background."
     )
 
     input3 = {
@@ -57,3 +57,33 @@ def generate_outfit_image(ansToSend, data_uri, sex_param, style_param):
     )
     print("image generated")
     return output_img
+
+def generate_outfit_video(output_img):
+    print(f"inside generate_outif_video")
+    prompt_flux = (
+        "Create a highly photorealistic image of the person from the input photo posing confidently on a fashion runway, "
+        "like a top model during a fashion show finale. Show a stylish, dynamic fashion pose, with one hand on the hip or a creative pose, "
+        "head held high, strong posture. Use dramatic runway lighting, professional fashion show background, and elegant atmosphere. "
+        "Make it look like a real high-fashion catwalk photo, with the person's face and style from the input photo. Vogue magazine style."
+    )
+
+    input4 = {
+        "prompt": prompt_flux,
+        "image": output_img,
+        "resolution": "480p",
+        "duration": 5,
+        "aspect_ratio": "16:9",
+        "fps": 24,
+    }
+
+    output = replicate.run(
+        "bytedance/seedance-1-pro",
+        input=input4,
+    )
+
+    with open("output.mp4", "wb") as file:
+        file.write(output.read())
+
+    return output
+
+
