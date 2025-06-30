@@ -47,6 +47,15 @@ const progressMessage = ref('')
 const sex = ref('male') // Domyślnie mężczyzna
 const selectedStyle = ref('casual') // Domyślny styl
 
+const styles = [
+  { value: 'casual', label: 'Casual' },
+  { value: 'formal', label: 'Formalny' },
+  { value: 'sport', label: 'Sportowy' },
+  { value: 'elegant', label: 'Elegancki' },
+  { value: 'streetwear', label: 'Streetwear' },
+  { value: 'vintage', label: 'Vintage' }
+]
+
 const selectedCount = computed(() =>
   Object.values(selected.value).filter(Boolean).length
 )
@@ -64,52 +73,14 @@ function handleFileSelected({ category, base64, previews: pv }) {
   previews.value[category] = pv
 }
 
-// async function mergeImagesVertically() {
-//   const selectedFiles = categories
-//     .filter(cat => selected.value[cat.key] && files.value[cat.key])
-//     .map(cat => files.value[cat.key]);
-
-//   if (selectedFiles.length === 0) return null;
-
-//   const imageElements = await Promise.all(
-//     selectedFiles.map(file => {
-//       return new Promise((resolve, reject) => {
-//         const reader = new FileReader();
-//         reader.onload = e => {
-//           const img = new Image();
-//           img.onload = () => resolve(img);
-//           img.onerror = reject;
-//           img.src = e.target.result;
-//         };
-//         reader.onerror = reject;
-//         reader.readAsDataURL(file);
-//       });
-//     })
-//   );
-
-//   const width = Math.max(...imageElements.map(img => img.width));
-//   const height = imageElements.reduce((sum, img) => sum + img.height, 0);
-
-//   const canvas = document.createElement('canvas');
-//   canvas.width = width;
-//   canvas.height = height;
-//   const ctx = canvas.getContext('2d');
-
-//   let y = 0;
-//   for (const img of imageElements) {
-//     ctx.drawImage(img, 0, y, img.width, img.height);
-//     y += img.height;
-//   }
-
-//   return canvas.toDataURL('image/png');
-// }
 
 async function generateVideo() {
   videoResult.value.isLoading = true
   videoResult.value.error = ''
   videoResult.value.video_url = ''
   try {
-    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit-video', {
+    //const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit-video', {
+    const res = await axios.post('http://192.168.0.164:5000/api/generate-outfit-video', {
       picture: result.value.img_url
     })
     videoResult.value.video_url = res.data?.video_url || res.data?.url || ''
@@ -145,7 +116,8 @@ async function generateSuggestion() {
     payload.selectedStyle = selectedStyle.value
 
     
-    const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', payload)
+    //const res = await axios.post('http://192.168.3.13:5000/api/generate-outfit', payload)
+    const res = await axios.post('http://192.168.0.164:5000/api/generate-outfit', payload)
     progressMessage.value = 'Odebrano odpowiedź. Przetwarzanie wyników...'
     result.value = {
       desc: res.data.desc,
@@ -192,12 +164,9 @@ async function generateSuggestion() {
         <p class="text-center mb-4">Wybierz docelowy styl ubioru</p>
         <div class="flex justify-center mb-4">
   <select v-model="selectedStyle" class="border border-gray-300 rounded p-2" style="margin:0; min-width: 180px; text-align:center;">
-            <option value="casual">Casual</option>
-            <option value="formal">Formalny</option>
-            <option value="sport">Sportowy</option>
-            <option value="elegant">Elegancki</option>
-            <option value="streetwear">Streetwear</option>
-            <option value="vintage">Vintage</option>
+          <option v-for="style in styles" :key="style.value" :value="style.value">
+            {{ style.label }}
+          </option>
           </select>
         </div>
       </div>
@@ -239,7 +208,12 @@ async function generateSuggestion() {
             >
               🎬 Wygenerować wideo?
           </button>
-          <div v-if="videoResult.isLoading" class="mt-2 text-blue-400">Generuję wideo...</div>
+          <div v-if="videoResult.isLoading" class="mt-2 text-blue-400">
+            <span style="color:#91a0ff;">Generuję video... Poczekaj chwilę</span>
+            <div class="loading-bar-container" style="margin: 0 auto;">
+              <div class="loading-bar"></div>
+            </div>
+          </div>
             <div v-if="videoResult.error" class="mt-2 text-red-400">{{ videoResult.error }}</div>
             <video
               v-if="videoResult.video_url"

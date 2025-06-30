@@ -1,9 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Home from './views/Home.vue'
-import OutfitVisualisation from './views/OutfitVisualisation.vue'
 import OutfitSuggestion from './views/OutfitSuggestion.vue'
-import imagemerge from './views/imagemerge.vue'
 import AuthorsView from './views/AuthorsView.vue'
 
 const currentView = ref('home')
