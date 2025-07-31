@@ -7,8 +7,8 @@ def get_clothing_description(data_uri):
         input={
             "image": data_uri,
             "prompt": (
-                "List all the clothing items visible in this photo. For each item, specify if it is a 'top' or a 'bottom', "
-                "and describe its color with a lot of details, pattern, and any visible logos or details. List each item on a separate line. "
+                "List all the clothing items visible in this photo. Each clothing is separated by black bar. For each item, specify if it is a 'top' or a 'bottom', "
+                "and describe its color or colors with a lot of details, pattern, and any visible logos or details. List each item on a separate line. "
                 "If it's t-shirt use 'T-Shirt', if jeans are baggie use 'Baggie jeans'."
             )
         }
@@ -19,7 +19,7 @@ def get_clothing_description(data_uri):
 def choose_best_outfit(clothing_list, sex_param, style_param):
     print(f"inside choose_best_outfit")
     prompt_for_next = (
-        f"{clothing_list}\nSelect the best outfit from the listed items using this style: Use style this style: {style_param} and this genred: {sex_param}. Return only one combination (one top and one bottom) and explain your choice. "
+        f"{clothing_list}\nSelect the best outfit from the listed items using this style: Use style this style: {style_param} and this gender: {sex_param}. Return only one combination (one top and one bottom) and explain your choice. "
         f"Do not explain, use this format, example: 'Top: white shirt, bottom: jeans'. "
     )
 
@@ -81,7 +81,7 @@ def generate_outfit_video(output_img):
         input=input4,
     )
 
-    with open("output.mp4", "wb") as file:
+    with open("../output.mp4", "wb") as file:
         file.write(output.read())
 
     return output

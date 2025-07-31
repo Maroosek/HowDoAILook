@@ -67,5 +67,22 @@ def generate_outfit_video_route():
     return jsonify({"video_url": video_url})
 
 
+@app.route('/api/test', methods=['GET'])
+def test_connection():
+
+    return jsonify({"message": "You are conneceted"})
+
+
+@app.route('/api/testImage', methods=["GET"])
+def test_image():
+    return jsonify(
+        {
+            "desc": "Opis",
+            "best_outfit": "Najlepszy fit",
+            "img_url": "https://replicate.delivery/xezq/LxtGt15DNb7SC9kOH0xcGYWrL9e6i5P5e1DOnQkVTXLb77FVA/tmprfjojzw6.jpg",
+            "img_merged": "merged_uri",
+        })
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
