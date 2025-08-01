@@ -1,19 +1,25 @@
-import base64
 from flask import Flask, request, jsonify
 from ai_handler import get_clothing_description, choose_best_outfit, generate_outfit_image, generate_outfit_video
 from flask_cors import CORS
 from photo_handler import ImageMerger
+import os
+
 app = Flask(__name__)
 CORS(app)
+
 
 @app.route('/api/generate-outfit', methods=['POST'])
 def generate_outfit():
     data = request.get_json()
 
+    apiToken = data.get("apiKey")
+    os.environ["REPLICATE_API_TOKEN"] = apiToken
+    print(apiToken)
+
     sex = data.get("sex")
     selected_style = data.get("selectedStyle")
     print(sex, selected_style)
-    shirts = data.get("shirt", [])
+    shirts = data.get("shirts", [])
     pants  = data.get("pants", [])
     shoes  = data.get("shoes", [])
 
@@ -45,6 +51,7 @@ def generate_outfit():
             "img_merged": merged_uri,
         })
 
+
 @app.route('/api/generate-outfit-video', methods=['POST'])
 def generate_outfit_video_route():
     data = request.get_json()
@@ -71,17 +78,6 @@ def generate_outfit_video_route():
 def test_connection():
 
     return jsonify({"message": "You are conneceted"})
-
-
-@app.route('/api/testImage', methods=["GET"])
-def test_image():
-    return jsonify(
-        {
-            "desc": "Opis",
-            "best_outfit": "Najlepszy fit",
-            "img_url": "https://replicate.delivery/xezq/LxtGt15DNb7SC9kOH0xcGYWrL9e6i5P5e1DOnQkVTXLb77FVA/tmprfjojzw6.jpg",
-            "img_merged": "merged_uri",
-        })
 
 
 if __name__ == "__main__":
